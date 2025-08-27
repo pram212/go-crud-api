@@ -5,6 +5,8 @@ import (
     "go-crud-api/database"
     "go-crud-api/models"
     "go-crud-api/routes"
+	"go-crud-api/middleware"
+	"github.com/gin-contrib/cors"
 )
 
 func main() {
@@ -14,6 +16,10 @@ func main() {
 
     // 2. Init Gin
     r := gin.Default()
+
+	r.Use(gin.Logger()) // middleware logging
+	r.Use(middleware.RequestLogger()) // middleware log waktu
+	r.Use(cors.Default()) // middleware CORS
 
     // 3. Routes
     r.GET("/users", routes.GetUsers)

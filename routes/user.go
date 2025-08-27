@@ -5,7 +5,10 @@ import (
     "go-crud-api/database"
     "go-crud-api/models"
     "net/http"
+    "github.com/go-playground/validator/v10"
 )
+
+var validate = validator.New()
 
 // GET /users
 func GetUsers(c *gin.Context) {
@@ -17,10 +20,34 @@ func GetUsers(c *gin.Context) {
 // POST /users
 func CreateUser(c *gin.Context) {
     var user models.User
+    // Ambil data dari request body
     if err := c.ShouldBindJSON(&user); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+
+    // Validasi field sesuai tag di model
+    if err := validate.Struct(user); err != nil {
+        errors := []string{}
+        for _, err := range err.(validator.ValidationErrors) {
+            var msg string
+            switch err.Tag() {
+            case "required":
+                msg = err.Field() + " is required"
+            case "email":
+                msg = err.Field() + " must be a valid email address"
+            case "min":
+                msg = err.Field() + " must be at least " + err.Param() + " characters"
+            default:
+                msg = "Invalid value for " + err.Field()
+            }
+            errors = append(errors, msg)
+        }
+        c.JSON(http.StatusBadRequest, gin.H{"validation_errors": errors})
+        return
+    }
+
+
     database.DB.Create(&user)
     c.JSON(http.StatusOK, user)
 }
