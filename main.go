@@ -12,21 +12,21 @@ import (
 func main() {
     // 1. Koneksi database
     database.Connect()
-    database.DB.AutoMigrate(&models.User{}) // otomatis bikin tabel user
+    database.DB.AutoMigrate(&models.User{}, &models.Post{}) // otomatis bikin tabel user dan post
 
     // 2. Init Gin
     r := gin.Default()
 
-	r.Use(gin.Logger()) // middleware logging
-	r.Use(middleware.RequestLogger()) // middleware log waktu
-	r.Use(cors.Default()) // middleware CORS
+    // middleware CORS
+	r.Use(cors.Default())
 
     // 3. Routes
-    r.GET("/users", routes.GetUsers)
-    r.POST("/users", routes.CreateUser)
-    r.GET("/users/:id", routes.GetUser)
-    r.PUT("/users/:id", routes.UpdateUser)
-    r.DELETE("/users/:id", routes.DeleteUser)
+    routes.AuthRoutes(r)
+    
+    // Protected routes
+    r.Use(middleware.AuthMiddleware())
+    routes.UserRoutes(r) // load user route
+    routes.PostRoutes(r) // load post route
 
     // 4. Run server
     r.Run(":8080") // default localhost:8080
