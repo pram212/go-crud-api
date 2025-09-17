@@ -48,6 +48,9 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	// record activity
+	go models.CreateActivity(user.ID, "create user with email "+user.Email)
+
 	utils.SuccessResponse(c, "User created successfully", gin.H{
 		"id":    user.ID,
 		"name":  user.Name,

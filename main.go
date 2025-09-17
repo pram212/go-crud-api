@@ -12,7 +12,7 @@ import (
 func main() {
     // 1. Koneksi database
     database.Connect()
-    database.DB.AutoMigrate(&models.User{}, &models.Post{}) // otomatis bikin tabel user dan post
+    database.DB.AutoMigrate(&models.User{}, &models.Post{}, &models.Log{}, &models.Activity{}) // otomatis bikin tabel user dan post
 
     // 2. Init Gin
     r := gin.Default()
@@ -27,7 +27,9 @@ func main() {
     r.Use(middleware.AuthMiddleware())
     routes.UserRoutes(r) // load user route
     routes.PostRoutes(r) // load post route
+    routes.ActivityRoutes(r) // load activity route
+    routes.DashboardRoutes(r) // load dashboard route
 
     // 4. Run server
-    r.Run(":8080") // default localhost:8080
+    r.Run(":8081") // default localhost:8080
 }

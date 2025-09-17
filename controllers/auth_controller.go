@@ -70,5 +70,9 @@ func Login(c *gin.Context) {
         },
     }
 
+    // record activity
+    go models.CreateActivity(user.ID, "login")
+
+    // return response
     utils.SuccessResponse(c, "Login successful", res)
 }
